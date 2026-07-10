@@ -19,6 +19,10 @@ const PORT = 3000;
 
 // Increase payload limit for larger files (DOCX, PDF, Excel, etc.) with Vercel compatibility
 app.use((req, res, next) => {
+  const method = req.method;
+  if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') {
+    return next();
+  }
   if (req.body && typeof req.body === 'object') {
     next();
   } else {
@@ -27,6 +31,10 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
+  const method = req.method;
+  if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') {
+    return next();
+  }
   if (req.body && typeof req.body === 'object') {
     next();
   } else {

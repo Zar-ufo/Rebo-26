@@ -2,7 +2,9 @@ import app from '../server';
 
 export const config = {
   api: {
-    bodyParser: false,
+    bodyParser: {
+      sizeLimit: '4.5mb',
+    },
   },
 };
 
