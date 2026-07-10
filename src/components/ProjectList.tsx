@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Folder, Plus, Trash2, Copy, Download, Upload, Edit3, Check, X,
   Calendar, FileText, ChevronRight, AlertCircle, RefreshCw
@@ -147,46 +148,55 @@ export default function ProjectList({
       </div>
 
       {/* Creation Form (collapsible) */}
-      {showCreateForm && (
-        <form onSubmit={handleSubmitCreate} className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 space-y-3 shadow-inner">
-          <div className="space-y-1">
-            <label className="block text-xs font-medium text-slate-600 dark:text-slate-400">Project Title *</label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Health Outcomes 2026"
-              value={newProjectName}
-              onChange={(e) => setNewProjectName(e.target.value)}
-              className="w-full text-sm px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="block text-xs font-medium text-slate-600 dark:text-slate-400">Description</label>
-            <textarea
-              placeholder="Brief description of research scope"
-              value={newProjectDesc}
-              onChange={(e) => setNewProjectDesc(e.target.value)}
-              rows={2}
-              className="w-full text-xs px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 resize-none"
-            />
-          </div>
-          <div className="flex justify-end space-x-2 pt-1">
-            <button
-              type="button"
-              onClick={() => setShowCreateForm(false)}
-              className="px-3 py-1 text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-all"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-3 py-1 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer transition-all font-medium"
-            >
-              Create Project
-            </button>
-          </div>
-        </form>
-      )}
+      <AnimatePresence>
+        {showCreateForm && (
+          <motion.form
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onSubmit={handleSubmitCreate}
+            className="p-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/70 space-y-3 shadow-inner overflow-hidden"
+          >
+            <div className="space-y-1">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400">Project Title *</label>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Health Outcomes 2026"
+                value={newProjectName}
+                onChange={(e) => setNewProjectName(e.target.value)}
+                className="w-full text-sm px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="block text-xs font-medium text-slate-600 dark:text-slate-400">Description</label>
+              <textarea
+                placeholder="Brief description of research scope"
+                value={newProjectDesc}
+                onChange={(e) => setNewProjectDesc(e.target.value)}
+                rows={2}
+                className="w-full text-xs px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 resize-none"
+              />
+            </div>
+            <div className="flex justify-end space-x-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowCreateForm(false)}
+                className="px-3 py-1 text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-3 py-1 text-xs bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg cursor-pointer transition-all font-medium"
+              >
+                Create Project
+              </button>
+            </div>
+          </motion.form>
+        )}
+      </AnimatePresence>
 
       {/* Projects List Container */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2">

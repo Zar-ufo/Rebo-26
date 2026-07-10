@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Upload, FileSpreadsheet, FileText, Plus, Trash2, BookOpen, AlertCircle, 
   HelpCircle, ChevronLeft, ChevronRight, CheckCircle2, RefreshCw
@@ -257,47 +258,64 @@ export default function DataManager({
               )}
             </div>
 
-            {showManualForm ? (
-              <form onSubmit={handleManualEntrySubmit} className="flex-1 flex flex-col space-y-3">
-                <input
-                  type="text"
-                  required
-                  placeholder="Note Title (e.g., Focus Group 1 observations)"
-                  value={entryTitle}
-                  onChange={(e) => setEntryTitle(e.target.value)}
-                  className="w-full text-xs px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                />
-                <textarea
-                  required
-                  placeholder="Record transcripts, qualitative data, or customized research notes here..."
-                  value={entryContent}
-                  onChange={(e) => setEntryContent(e.target.value)}
-                  rows={4}
-                  className="w-full flex-1 text-xs px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none"
-                />
-                <div className="flex justify-end space-x-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowManualForm(false)}
-                    className="px-3 py-1 text-xs text-slate-500 hover:bg-slate-100 rounded-lg cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-3 py-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium cursor-pointer"
-                  >
-                    Save Observation
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className="flex-1 flex flex-col justify-center items-center text-center p-4">
-                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs">
-                  Supplement your file datasets with manual observation notes, field interviews, or qualitative surveys. They will be included directly in the AI research analysis context.
-                </p>
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              {showManualForm ? (
+                <motion.form
+                  key="manual-form"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  onSubmit={handleManualEntrySubmit}
+                  className="flex-1 flex flex-col space-y-3"
+                >
+                  <input
+                    type="text"
+                    required
+                    placeholder="Note Title (e.g., Focus Group 1 observations)"
+                    value={entryTitle}
+                    onChange={(e) => setEntryTitle(e.target.value)}
+                    className="w-full text-xs px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  />
+                  <textarea
+                    required
+                    placeholder="Record transcripts, qualitative data, or customized research notes here..."
+                    value={entryContent}
+                    onChange={(e) => setEntryContent(e.target.value)}
+                    rows={4}
+                    className="w-full flex-1 text-xs px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 resize-none"
+                  />
+                  <div className="flex justify-end space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowManualForm(false)}
+                      className="px-3 py-1 text-xs text-slate-500 hover:bg-slate-100 rounded-lg cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-3 py-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium cursor-pointer"
+                    >
+                      Save Observation
+                    </button>
+                  </div>
+                </motion.form>
+              ) : (
+                <motion.div
+                  key="manual-placeholder"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex-1 flex flex-col justify-center items-center text-center p-4"
+                >
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs">
+                    Supplement your file datasets with manual observation notes, field interviews, or qualitative surveys. They will be included directly in the AI research analysis context.
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
