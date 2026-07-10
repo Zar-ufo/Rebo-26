@@ -13,7 +13,7 @@ import { ResearchFile, ManualDataEntry, ResearchProject } from '../types';
 
 interface DataManagerProps {
   activeProject: ResearchProject;
-  onAddFile: (file: Omit<ResearchFile, 'id' | 'uploadedAt'>) => Promise<void>;
+  onAddFile: (file: Omit<ResearchFile, 'id' | 'uploadedAt'>) => Promise<ResearchFile | undefined>;
   onDeleteFile: (fileId: string) => void;
   onAddManualEntry: (entry: Omit<ManualDataEntry, 'id' | 'timestamp'>) => void;
   onDeleteManualEntry: (entryId: string) => void;
@@ -27,7 +27,8 @@ export default function DataManager({
   onDeleteManualEntry
 }: DataManagerProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploadState, setUploadState] = useState<'idle' | 'reading' | 'uploading' | 'analyzing' | 'saving' | 'success'>('idle');
+  const [uploadProgress, setUploadProgress] = useState<string>('');
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Manual entry states
@@ -68,8 +69,9 @@ export default function DataManager({
   };
 
   const processUploadedFile = async (file: File) => {
-    setUploading(true);
     setUploadError(null);
+    setUploadState('reading');
+    setUploadProgress('Reading local file bytes & validating size...');
 
     const name = file.name;
     const extension = name.split('.').pop()?.toLowerCase();
@@ -83,85 +85,101 @@ export default function DataManager({
 
     if (!type) {
       setUploadError(`Unsupported file extension: .${extension}. Please upload CSV, Excel, PDF, DOCX, or TXT.`);
-      setUploading(false);
+      setUploadState('idle');
       return;
     }
 
     // Limit files to 3.5MB to stay within Vercel's 4.5MB serverless payload limit
     if (file.size > 3.5 * 1024 * 1024) {
-      setUploadError(`File is too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). To prevent Vercel Serverless errors, please upload files smaller than 3.5MB.`);
-      setUploading(false);
+      setUploadError(`File is too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). Please upload files smaller than 3.5MB to ensure fast processing.`);
+      setUploadState('idle');
       return;
     }
 
+    const readFileAsBase64 = (fileObj: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          const base64 = result.split(',')[1];
+          resolve(base64);
+        };
+        reader.onerror = () => reject(new Error('Failed to read local file bytes.'));
+        reader.readAsDataURL(fileObj);
+      });
+    };
+
     try {
-      // Read file to base64
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64String = (reader.result as string).split(',')[1];
-        
+      const base64String = await readFileAsBase64(file);
+      
+      setUploadState('uploading');
+      setUploadProgress('Uploading payload to secure parser server...');
+
+      // Let's perform a small delay for premium feels and smooth UI transitions
+      await new Promise(resolve => setTimeout(resolve, 600));
+
+      setUploadState('analyzing');
+      setUploadProgress(type === 'pdf' || type === 'docx' || type === 'txt' 
+        ? 'Parsing document layout with Google Gemini 3.5 Flash...'
+        : 'Analyzing rows, columns, and layout parameters...'
+      );
+
+      const response = await fetch('/api/analyze-file', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          type,
+          content: base64String
+        })
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Server error during extraction';
         try {
-          // Send to server API for extraction
-          const response = await fetch('/api/analyze-file', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name,
-              type,
-              content: base64String
-            })
-          });
-
-          if (!response.ok) {
-            let errorMessage = 'Server error during extraction';
-            try {
-              const errText = await response.text();
-              try {
-                const errData = JSON.parse(errText);
-                errorMessage = errData.error || errorMessage;
-              } catch (e) {
-                errorMessage = errText || errorMessage;
-              }
-            } catch (e2) {}
-            throw new Error(errorMessage);
+          const errText = await response.text();
+          try {
+            const errData = JSON.parse(errText);
+            errorMessage = errData.error || errorMessage;
+          } catch (e) {
+            errorMessage = errText || errorMessage;
           }
-
-          const parsedData = await response.json();
-
-          // Save file to active project
-          await onAddFile({
-            name,
-            type: type!,
-            fileSize: file.size,
-            content: base64String,
-            parsedData
-          });
-
-          // Automatically select for preview if it's spreadsheet or has tables
-          setSelectedFileId(activeProject.files[activeProject.files.length]?.id || null);
-          setPreviewPage(1);
-
-        } catch (err: any) {
-          setUploadError(err.message || 'Failed to process file on the server. Please try again.');
-        } finally {
-          setUploading(false);
-        }
-      };
-
-      reader.onerror = () => {
-        setUploadError('Failed to read local file.');
-        setUploading(false);
-      };
-
-      if (type === 'txt') {
-        reader.readAsDataURL(file); // Keep base64 format for simplicity
-      } else {
-        reader.readAsDataURL(file);
+        } catch (e2) {}
+        throw new Error(errorMessage);
       }
 
+      const parsedData = await response.json();
+
+      setUploadState('saving');
+      setUploadProgress('Saving structured dataset context and metadata...');
+      await new Promise(resolve => setTimeout(resolve, 400));
+
+      // Save file to active project and capture returned ResearchFile
+      const newFile = await onAddFile({
+        name,
+        type: type!,
+        fileSize: file.size,
+        content: base64String,
+        parsedData
+      });
+
+      setUploadState('success');
+      setUploadProgress('Dataset parsed and integrated successfully!');
+
+      if (newFile) {
+        setSelectedFileId(newFile.id);
+        setPreviewPage(1);
+      }
+
+      // Revert to idle after a brief success delay
+      setTimeout(() => {
+        setUploadState('idle');
+      }, 1500);
+
     } catch (err: any) {
-      setUploadError(err.message || 'File upload failed.');
-      setUploading(false);
+      console.error('File process error:', err);
+      setUploadError(err.message || 'Failed to process file. Please try again.');
+      setUploadState('idle');
     }
   };
 
@@ -208,17 +226,58 @@ export default function DataManager({
               className="hidden"
             />
 
-            {uploading ? (
-              <div className="flex flex-col items-center space-y-3">
-                <RefreshCw className="w-10 h-10 text-indigo-500 animate-spin" />
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                    Extracting & Cleaning Dataset...
+            {uploadState !== 'idle' ? (
+              <div className="flex flex-col items-center space-y-4 py-4 w-full max-w-sm">
+                {uploadState === 'success' ? (
+                  <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 className="w-7 h-7" />
+                  </div>
+                ) : (
+                  <div className="relative flex items-center justify-center">
+                    <RefreshCw className="w-12 h-12 text-indigo-500 animate-spin" />
+                    <span className="absolute text-[10px] font-mono text-indigo-600 dark:text-indigo-400 font-semibold">
+                      {uploadState === 'reading' && 'RD'}
+                      {uploadState === 'uploading' && 'UP'}
+                      {uploadState === 'analyzing' && 'AI'}
+                      {uploadState === 'saving' && 'SV'}
+                    </span>
+                  </div>
+                )}
+                
+                <div className="space-y-1.5 text-center">
+                  <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-200 capitalize">
+                    {uploadState === 'success' ? 'Extraction Successful' : 'Processing Dataset...'}
                   </h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-xs">
-                    Detecting table layout, identifying columns, and computing descriptive statistics programmatically.
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400 font-mono font-medium animate-pulse">
+                    {uploadProgress}
                   </p>
                 </div>
+
+                {/* Micro step tracker bar */}
+                <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                  <div 
+                    className={`h-full transition-all duration-500 ease-out ${
+                      uploadState === 'success' ? 'bg-emerald-500 w-full' : 'bg-indigo-500'
+                    }`}
+                    style={{
+                      width: 
+                        uploadState === 'reading' ? '15%' :
+                        uploadState === 'uploading' ? '40%' :
+                        uploadState === 'analyzing' ? '75%' :
+                        uploadState === 'saving' ? '90%' :
+                        uploadState === 'success' ? '100%' : '0%'
+                    }}
+                  />
+                </div>
+                
+                {/* Descriptive sub-message */}
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-sans max-w-xs px-2">
+                  {uploadState === 'reading' && 'Validating file extension, size boundaries, and integrity.'}
+                  {uploadState === 'uploading' && 'Transmitting Base64 payload package safely to backend services.'}
+                  {uploadState === 'analyzing' && 'Running high-fidelity parsing, parsing headers, and invoking AI context.'}
+                  {uploadState === 'saving' && 'Generating persistent metadata and local indices.'}
+                  {uploadState === 'success' && 'Your document has been fully analyzed and is ready to explore.'}
+                </span>
               </div>
             ) : (
               <div className="space-y-4">

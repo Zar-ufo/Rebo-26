@@ -185,8 +185,8 @@ export default function App() {
   };
 
   // Active Project Mutators
-  const handleAddFile = async (fileData: Omit<ResearchFile, 'id' | 'uploadedAt'>) => {
-    if (!activeProject) return;
+  const handleAddFile = async (fileData: Omit<ResearchFile, 'id' | 'uploadedAt'>): Promise<ResearchFile | undefined> => {
+    if (!activeProject) return undefined;
 
     const newFile: ResearchFile = {
       ...fileData,
@@ -203,6 +203,7 @@ export default function App() {
     await saveProject(updatedProj);
     const updatedList = await getProjects();
     setProjects(updatedList);
+    return newFile;
   };
 
   const handleDeleteFile = async (fileId: string) => {
