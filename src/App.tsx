@@ -17,12 +17,26 @@ import DataManager from './components/DataManager';
 import StatsViewer from './components/StatsViewer';
 import AnalysisViewer from './components/AnalysisViewer';
 import ChatBox from './components/ChatBox';
+import { UserManual } from './components/UserManual';
 
 export default function App() {
   const [darkMode, setDarkMode] = useState(true);
+  const [showManual, setShowManual] = useState(false);
   const [projects, setProjects] = useState<ResearchProject[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'datasets' | 'stats' | 'analysis' | 'chat'>('datasets');
+
+  useEffect(() => {
+    const hasShown = localStorage.getItem('rebo_manual_shown');
+    if (!hasShown) {
+      setShowManual(true);
+    }
+  }, []);
+
+  const handleCloseManual = () => {
+    localStorage.setItem('rebo_manual_shown', 'true');
+    setShowManual(false);
+  };
 
   // Apply dark/light theme to document element
   useEffect(() => {
@@ -430,13 +444,21 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 dark:text-slate-500">
           <div>
             &copy; {new Date().getFullYear()} <span className="font-semibold text-slate-600 dark:text-slate-400">rebo</span>. All rights reserved.
+            <button onClick={() => setShowManual(true)} className="ml-4 text-indigo-600 dark:text-indigo-400 hover:underline">View Manual</button>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span>Made with ❤️ by</span>
-            <span className="font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/60 px-2 py-0.5 rounded-md">Zarufo</span>
+          <div className="flex flex-col sm:flex-row items-center gap-2">
+            <span className="flex items-center gap-1.5">
+              <span>Made by</span>
+              <span className="font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/60 px-2 py-0.5 rounded-md">Abdullah Zarif</span>
+            </span>
+            <div className="text-slate-300 dark:text-slate-700 hidden sm:block">|</div>
+            <a href="tel:001862443237" className="hover:text-indigo-600 dark:hover:text-indigo-400">001862443237</a>
+            <div className="text-slate-300 dark:text-slate-700 hidden sm:block">|</div>
+            <a href="https://www.facebook.com/abdullah.zarif.050" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400">Facebook</a>
           </div>
         </div>
       </footer>
+      {showManual && <UserManual onClose={handleCloseManual} />}
     </div>
   );
 }
