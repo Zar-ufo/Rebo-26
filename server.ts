@@ -21,15 +21,26 @@ const PORT = 3000;
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
-// Initialize Gemini SDK with telemetry header
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || '',
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
+// Initialize Gemini SDK lazily with telemetry header
+let aiClient: GoogleGenAI | null = null;
+
+function getGoogleGenAI(): GoogleGenAI {
+  if (!aiClient) {
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) {
+      throw new Error('GEMINI_API_KEY environment variable is required but was not found.');
     }
+    aiClient = new GoogleGenAI({
+      apiKey: key,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
   }
-});
+  return aiClient;
+}
 
 // Helper: Robust generation with retry and automatic fallback from gemini-3.5-flash to gemini-3.1-flash-lite
 async function generateContentWithRetry(params: any, maxRetries = 3, delayMs = 1000): Promise<any> {
@@ -39,6 +50,7 @@ async function generateContentWithRetry(params: any, maxRetries = 3, delayMs = 1
   while (attempt < maxRetries) {
     try {
       const runParams = { ...params, model: currentModel };
+      const ai = getGoogleGenAI();
       return await ai.models.generateContent(runParams);
     } catch (error: any) {
       attempt++;
@@ -71,6 +83,7 @@ async function generateContentStreamWithRetry(params: any, maxRetries = 3, delay
   while (attempt < maxRetries) {
     try {
       const runParams = { ...params, model: currentModel };
+      const ai = getGoogleGenAI();
       return await ai.models.generateContentStream(runParams);
     } catch (error: any) {
       attempt++;
@@ -226,6 +239,11 @@ function calculateColumnStats(rows: Array<Record<string, any>>): any[] {
 }
 
 // ==================== API ROUTES ====================
+
+// Simple Health Check Endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', time: new Date().toISOString(), platform: process.env.VERCEL ? 'vercel' : 'local' });
+});
 
 // Endpoint 1: Parse and clean data / files
 app.post('/api/analyze-file', async (req, res) => {
