@@ -106,8 +106,17 @@ export default function DataManager({
           });
 
           if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.error || 'Server error during extraction');
+            let errorMessage = 'Server error during extraction';
+            try {
+              const errText = await response.text();
+              try {
+                const errData = JSON.parse(errText);
+                errorMessage = errData.error || errorMessage;
+              } catch (e) {
+                errorMessage = errText || errorMessage;
+              }
+            } catch (e2) {}
+            throw new Error(errorMessage);
           }
 
           const parsedData = await response.json();
