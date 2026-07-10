@@ -87,6 +87,13 @@ export default function DataManager({
       return;
     }
 
+    // Limit files to 3.5MB to stay within Vercel's 4.5MB serverless payload limit
+    if (file.size > 3.5 * 1024 * 1024) {
+      setUploadError(`File is too large (${(file.size / (1024 * 1024)).toFixed(2)}MB). To prevent Vercel Serverless errors, please upload files smaller than 3.5MB.`);
+      setUploading(false);
+      return;
+    }
+
     try {
       // Read file to base64
       const reader = new FileReader();

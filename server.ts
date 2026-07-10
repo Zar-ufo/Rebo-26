@@ -260,13 +260,13 @@ app.get('/api/health', (req, res) => {
 
 // Endpoint 1: Parse and clean data / files
 app.post('/api/analyze-file', async (req, res) => {
-  const { name, type, content } = req.body;
-
-  if (!name || !type || !content) {
-    return res.status(400).json({ error: 'Missing name, type, or content' });
-  }
-
   try {
+    const { name, type, content } = req.body || {};
+
+    if (!name || !type || !content) {
+      return res.status(400).json({ error: 'Missing name, type, or content' });
+    }
+
     let parsedData: any = {};
 
     if (type === 'csv' || type === 'excel') {
@@ -454,13 +454,12 @@ Your output MUST be a strict JSON object matches this schema exactly:
 
 // Endpoint 2: Full Research Analysis (Streaming via SSE)
 app.post('/api/project/analyze-stream', async (req, res) => {
-  const { name, description, files, dataEntries } = req.body;
-
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
   try {
+    const { name, description, files, dataEntries } = req.body || {};
     // Build an exhaustive research prompt with programmatic context
     let projectContext = `Project Name: ${name}\n`;
     projectContext += `Description: ${description || 'No description provided.'}\n\n`;
@@ -560,17 +559,18 @@ Ensure the output is beautifully articulated and highly detailed. Ensure the JSO
 
 // Endpoint 3: Chat with Project Context (Streaming via SSE)
 app.post('/api/project/chat-stream', async (req, res) => {
-  const { project, message, chatHistory } = req.body;
-
-  if (!project || !message) {
-    return res.status(400).json({ error: 'Missing project or message' });
-  }
-
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
   try {
+    const { project, message, chatHistory } = req.body || {};
+
+    if (!project || !message) {
+      res.write(`data: ${JSON.stringify({ error: 'Missing project or message' })}\n\n`);
+      return res.end();
+    }
+
     // Compile context from project
     let context = `--- RESEARCH PROJECT DOSSIER ---\n`;
     context += `Project Name: ${project.name}\n`;
