@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Premium Elegant adaptive shades */
+  --color-slate-50: var(--slate-50);
+  --color-slate-100: var(--slate-100);
+  --color-slate-200: var(--slate-200);
+  --color-slate-300: var(--slate-300);
+  --color-slate-400: var(--slate-400);
+  --color-slate-500: var(--slate-500);
+  --color-slate-600: var(--slate-600);
+  --color-slate-700: var(--slate-700);
+  --color-slate-800: var(--slate-800);
+  --color-slate-900: var(--slate-900);
+  --color-slate-950: var(--slate-950);
+}
+
+@variant dark (.dark &);
+
+:root {
+  /* Elegant Professional Light Mode (High Contrast, Crisp, Clean Slate/Zinc palette) */
+  --slate-50: #f8fafc;     /* Light Page Background */
+  --slate-100: #f1f5f9;    /* Light Panel / Sidebar Background */
+  --slate-200: #e2e8f0;    /* Light border lines */
+  --slate-300: #cbd5e1;    /* Secondary border lines */
+  --slate-400: #94a3b8;    /* Muted metadata text */
+  --slate-500: #64748b;    /* Muted label / helper text */
+  --slate-600: #475569;    /* Secondary text / actions */
+  --slate-700: #334155;    /* Soft readable body text */
+  --slate-800: #1e293b;    /* Dark subheadings */
+  --slate-900: #0f172a;    /* High contrast darkest charcoal text */
+  --slate-950: #020617;    /* Ultra dark panels */
+}
+
+.dark {
+  /* Premium Elegant Pitch Dark Mode */
+  --slate-50: #0c0c0e;     /* Pure black page background */
+  --slate-100: #f1f5f9;    /* Light text color (e.g. dark:text-slate-100) */
+  --slate-200: #e2e8f0;    /* Light text color (e.g. dark:text-slate-200) */
+  --slate-300: #cbd5e1;    /* Light text color (e.g. dark:text-slate-300) */
+  --slate-400: #a1a1aa;    /* Light gray metadata text */
+  --slate-500: #71717a;    /* Muted label text */
+  --slate-600: #2a2a2d;    /* Dark border line */
+  --slate-700: #222224;    /* Dark border line */
+  --slate-800: #1d1d21;    /* Dark container background */
+  --slate-900: #161618;    /* Card and modular widget background */
+  --slate-950: #0c0c0e;    /* Pitch black inner panel / input fields */
+}
+
+/* Let's inject premium custom scrollbars for Elegant Dark */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--slate-50);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--slate-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--slate-500);
+}
+
+/* Support for custom print styles as requested by Print/PDF action */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .printable-report {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}
