@@ -684,6 +684,17 @@ Your role:
 });
 
 
+// Global Error Handler Middleware
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Global Express Error:', err);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: err.message || 'An unexpected error occurred.',
+    stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined
+  });
+});
+
+
 // ==================== VITE DEVELOPMENT MIDDLEWARE / PRODUCTION STATIC SERVING ====================
 
 async function startServer() {
