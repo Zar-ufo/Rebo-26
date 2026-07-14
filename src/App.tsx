@@ -18,8 +18,11 @@ import StatsViewer from './components/StatsViewer';
 import AnalysisViewer from './components/AnalysisViewer';
 import ChatBox from './components/ChatBox';
 import { UserManual } from './components/UserManual';
+import AuthScreen from './components/AuthScreen';
+import { useAuth } from './contexts/AuthContext';
 
 export default function App() {
+  const { user, loading: authLoading, signOut } = useAuth();
   const [darkMode, setDarkMode] = useState(true);
   const [showManual, setShowManual] = useState(false);
   const [projects, setProjects] = useState<ResearchProject[]>([]);
@@ -296,6 +299,16 @@ export default function App() {
     setProjects(updatedList);
   };
 
+  if (authLoading) {
+    return (
+      <main className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center" aria-label="Loading account">
+        <div className="h-8 w-8 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
+      </main>
+    );
+  }
+
+  if (!user) return <AuthScreen />;
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 font-sans flex flex-col transition-colors duration-300">
       
@@ -305,6 +318,8 @@ export default function App() {
         setDarkMode={setDarkMode} 
         activeProject={activeProject} 
         totalProjects={projects.length}
+        user={user}
+        onSignOut={signOut}
       />
 
       <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">

@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { Sparkles, Sun, Moon, Database, FileText, BarChart3, GraduationCap } from 'lucide-react';
+import { Sun, Moon, Database, FileText, BarChart3, GraduationCap, LogOut } from 'lucide-react';
+import type { User } from '@supabase/supabase-js';
 import { ResearchProject } from '../types';
 
 interface HeaderProps {
@@ -12,9 +13,11 @@ interface HeaderProps {
   setDarkMode: (val: boolean) => void;
   activeProject: ResearchProject | null;
   totalProjects: number;
+  user: User;
+  onSignOut: () => Promise<void>;
 }
 
-export default function Header({ darkMode, setDarkMode, activeProject, totalProjects }: HeaderProps) {
+export default function Header({ darkMode, setDarkMode, activeProject, user, onSignOut }: HeaderProps) {
   // Count total files and manual entries in all projects (or just active one)
   const fileCount = activeProject?.files.length || 0;
   const entryCount = activeProject?.dataEntries.length || 0;
@@ -69,14 +72,37 @@ export default function Header({ darkMode, setDarkMode, activeProject, totalProj
         )}
 
         {/* Theme and Actions */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="hidden sm:flex items-center gap-2 border-r border-slate-200 dark:border-slate-700 pr-3">
+            {user.user_metadata.avatar_url ? (
+              <img src={user.user_metadata.avatar_url} alt="" className="h-8 w-8 rounded-full object-cover" referrerPolicy="no-referrer" />
+            ) : (
+              <div className="h-8 w-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">
+                {(user.email?.[0] ?? 'U').toUpperCase()}
+              </div>
+            )}
+            <div className="hidden lg:block max-w-36">
+              <p className="truncate text-xs font-semibold text-slate-800 dark:text-slate-100">{user.user_metadata.full_name ?? 'Researcher'}</p>
+              <p className="truncate text-[10px] text-slate-500 dark:text-slate-400">{user.email}</p>
+            </div>
+          </div>
           <button
             onClick={() => setDarkMode(!darkMode)}
             id="theme-toggle-btn"
             className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer border border-slate-200/40 dark:border-slate-800/40"
             title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {darkMode ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-indigo-600" />}
+          </button>
+          <button
+            type="button"
+            onClick={() => void onSignOut()}
+            className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer border border-slate-200/40 dark:border-slate-800/40"
+            title="Sign out"
+            aria-label="Sign out"
+          >
+            <LogOut className="h-5 w-5" />
           </button>
         </div>
 
