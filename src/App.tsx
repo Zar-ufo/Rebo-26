@@ -12,8 +12,6 @@ import {
 import { ResearchProject, ResearchFile, ManualDataEntry, ChatMessage, ProjectAnalysis } from './types';
 import { getProjects, saveProject, deleteProject, getProject } from './lib/db';
 import Header from './components/Header';
-import Auth from './components/Auth';
-import { supabase } from './lib/supabase';
 import ProjectList from './components/ProjectList';
 import DataManager from './components/DataManager';
 import StatsViewer from './components/StatsViewer';
@@ -27,36 +25,12 @@ export default function App() {
   const [projects, setProjects] = useState<ResearchProject[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'datasets' | 'stats' | 'analysis' | 'chat'>('datasets');
-  const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
     const hasShown = localStorage.getItem('rebo_manual_shown');
     if (!hasShown) {
       setShowManual(true);
     }
-  }, []);
-
-  // Supabase auth session handling
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const { data } = await supabase.auth.getSession();
-        if (!mounted) return;
-        setSession(data.session || null);
-      } catch (err) {
-        // ignore
-      }
-    })();
-
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, currentSession) => {
-      setSession(currentSession);
-    });
-
-    return () => {
-      mounted = false;
-      listener?.subscription.unsubscribe();
-    };
   }, []);
 
   const handleCloseManual = () => {
@@ -321,14 +295,6 @@ export default function App() {
     const updatedList = await getProjects();
     setProjects(updatedList);
   };
-
-  if (!session) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 font-sans flex items-center justify-center">
-        <Auth onAuth={() => { /* no-op, listener will update session */ }} />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-300 font-sans flex flex-col transition-colors duration-300">

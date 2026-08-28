@@ -6,7 +6,6 @@
 import React from 'react';
 import { Sparkles, Sun, Moon, Database, FileText, BarChart3, GraduationCap } from 'lucide-react';
 import { ResearchProject } from '../types';
-import { supabase } from '../lib/supabase';
 
 interface HeaderProps {
   darkMode: boolean;
@@ -79,7 +78,6 @@ export default function Header({ darkMode, setDarkMode, activeProject, totalProj
           >
             {darkMode ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-indigo-600" />}
           </button>
-          <button onClick={async () => { await supabase.auth.signOut(); }} className="px-3 py-1 rounded-md text-sm border border-slate-200/60 dark:border-slate-800/50 text-slate-600 dark:text-slate-300">Sign out</button>
         </div>
 
       </div>
