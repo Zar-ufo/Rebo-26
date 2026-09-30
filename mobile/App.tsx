@@ -4,8 +4,8 @@ import { ActivityIndicator, BackHandler, Linking, Pressable, StyleSheet, Text, V
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { WebView, type WebViewNavigation } from 'react-native-webview';
 
-const REBO_URL = 'https://rebo-26.vercel.app/?native=1';
-const REBO_HOST = 'rebo-26.vercel.app';
+const REBO_URL = 'https://rebo26.netlify.app/?native=1';
+const REBO_HOST = 'rebo26.netlify.app';
 
 export default function App() {
   const webView = useRef<WebView>(null);
@@ -34,6 +34,7 @@ export default function App() {
         <WebView
           ref={webView}
           source={{ uri: REBO_URL }}
+          applicationNameForUserAgent="Rebo26App"
           style={styles.webView}
           originWhitelist={['https://*']}
           javaScriptEnabled

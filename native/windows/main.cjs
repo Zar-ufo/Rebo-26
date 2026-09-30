@@ -1,6 +1,6 @@
 const { app, BrowserWindow, shell } = require('electron');
 
-const appUrl = process.env.REBO_APP_URL || 'https://rebo-26.vercel.app/?native=1';
+const appUrl = process.env.REBO_APP_URL || 'https://rebo26.netlify.app/?native=1';
 const appOrigin = new URL(appUrl).origin;
 
 function openExternal(url) {

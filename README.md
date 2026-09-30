@@ -27,7 +27,7 @@ The website homepage is the Rebo install page. Open `/app` to use the research w
 - **Android:** Install `release/Rebo-Android.apk` (allow your file manager/browser to install apps if asked), or add the browser app from Chrome.
 - Serve the deployed site over **HTTPS** for browser installation and service-worker caching. AI features still need an internet connection.
 
-The native wrappers open the hosted app at `https://rebo-26.vercel.app/?native=1`; that query parameter keeps them pointed at the research workspace even while the homepage is the download page. They require internet access.
+The native wrappers open the hosted app at `https://rebo26.netlify.app/?native=1`; that query parameter keeps them pointed at the research workspace even while the homepage is the download page. They require internet access.
 
 ### Build native apps
 
