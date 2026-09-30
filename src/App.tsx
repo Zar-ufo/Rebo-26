@@ -465,7 +465,27 @@ function ResearchApp() {
   );
 }
 
+// The research workspace is only available inside the Windows (.exe, Electron) and
+// Android (.apk, WebView) apps. Both load the site with ?native=1, and the user agent
+// confirms it is really the packaged app rather than a regular browser tab.
+function isPackagedApp() {
+  const ua = navigator.userAgent;
+  const isElectron = /\bElectron\//i.test(ua);
+  const isAndroidWebView = /Android/i.test(ua) && /\bwv\b/.test(ua);
+  const isReboShell = /\bReboApp\b/.test(ua);
+  if (!isElectron && !isAndroidWebView && !isReboShell) return false;
+
+  const flagged = new URLSearchParams(window.location.search).get('native') === '1';
+  try {
+    if (flagged) sessionStorage.setItem('rebo-native', '1');
+    return flagged || sessionStorage.getItem('rebo-native') === '1';
+  } catch {
+    return flagged;
+  }
+}
+
 export default function App() {
-  const isNativeApp = new URLSearchParams(window.location.search).get('native') === '1';
-  return window.location.pathname === '/app' || isNativeApp ? <ResearchApp /> : <DownloadPage />;
+  if (isPackagedApp()) return <ResearchApp />;
+  if (window.location.pathname !== '/') window.history.replaceState(null, '', '/');
+  return <DownloadPage />;
 }

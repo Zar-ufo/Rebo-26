@@ -35,6 +35,7 @@ export default function App() {
           ref={webView}
           source={{ uri: REBO_URL }}
           style={styles.webView}
+          applicationNameForUserAgent="ReboApp"
           originWhitelist={['https://*']}
           javaScriptEnabled
           domStorageEnabled

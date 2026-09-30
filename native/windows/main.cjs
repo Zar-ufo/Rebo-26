@@ -38,6 +38,7 @@ function createWindow() {
     }
   });
 
+  window.webContents.setUserAgent(`${window.webContents.getUserAgent()} ReboApp`);
   window.loadURL(appUrl);
 }
 
