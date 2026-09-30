@@ -1,1 +1,5 @@
+/download/windows  https://github.com/Zar-ufo/Rebo-26/releases/download/app-downloads/Rebo-Setup.exe  302
+/download/android  https://github.com/Zar-ufo/Rebo-26/releases/download/app-downloads/Rebo-Android.apk  302
+/release/Rebo26%201.0.0.exe  /download/windows  301
+/release/Rebo26-Android.apk  /download/android  301
 /app  /index.html  200
