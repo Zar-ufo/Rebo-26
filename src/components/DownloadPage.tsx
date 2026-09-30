@@ -29,7 +29,7 @@ export default function DownloadPage() {
   return (
     <div className="download-site">
       <header className="download-nav">
-        <a className="download-brand" href="/" aria-label="Rebo home">
+        <a className="download-brand" href="/download" aria-label="Rebo home">
           <span className="download-brand-mark"><Sparkles size={19} /></span>
           <span>rebo<span className="brand-period">.</span></span>
         </a>
@@ -105,7 +105,7 @@ export default function DownloadPage() {
         </section>
       </main>
 
-      <footer className="download-footer"><a className="download-brand" href="/"><span className="download-brand-mark"><Sparkles size={17} /></span><span>rebo<span className="brand-period">.</span></span></a><span>AI research, ready when you are.</span><a href="#install-help">Download <ArrowRight size={14} /></a></footer>
+      <footer className="download-footer"><a className="download-brand" href="/download"><span className="download-brand-mark"><Sparkles size={17} /></span><span>rebo<span className="brand-period">.</span></span></a><span>AI research, ready when you are.</span><a href="#install-help">Download <ArrowRight size={14} /></a></footer>
     </div>
   );
 }

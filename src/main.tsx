@@ -3,12 +3,11 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch((error) => {
-      console.error('Rebo could not register its offline app shell:', error);
-    });
-  });
+// Remove the old offline service worker so browsers never serve a cached copy of the workspace.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations()
+    .then((registrations) => registrations.forEach((registration) => registration.unregister()))
+    .catch(() => undefined);
 }
 
 createRoot(document.getElementById('root')!).render(

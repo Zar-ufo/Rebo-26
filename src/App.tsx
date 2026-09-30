@@ -484,8 +484,14 @@ function isPackagedApp() {
   }
 }
 
+const DOWNLOAD_PATH = '/download';
+
 export default function App() {
   if (isPackagedApp()) return <ResearchApp />;
-  if (window.location.pathname !== '/') window.history.replaceState(null, '', '/');
+  // Regular browsers only get the download section; send them there from any other URL.
+  if (window.location.pathname !== DOWNLOAD_PATH) {
+    window.location.replace(DOWNLOAD_PATH);
+    return null;
+  }
   return <DownloadPage />;
 }
