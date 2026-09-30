@@ -5,6 +5,7 @@ dist/
 !/release/
 !/release/README.md
 !/release/Rebo26 Setup 1.0.0.exe
+!/release/Rebo26 Setup 1.0.0.zip
 android/
 ios/
 coverage/
