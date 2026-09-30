@@ -1,11 +1,31 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import { copyFileSync, mkdirSync } from 'fs';
 import path from 'path';
 import {defineConfig} from 'vite';
 
+const releaseDownloads = [
+  'Rebo26 1.0.0.exe',
+  'Rebo26-Android.apk',
+];
+
+function copyReleaseDownloads() {
+  return {
+    name: 'copy-release-downloads',
+    closeBundle() {
+      const releaseDirectory = path.resolve(__dirname, 'release');
+      const outputDirectory = path.resolve(__dirname, 'dist', 'release');
+      mkdirSync(outputDirectory, { recursive: true });
+      for (const fileName of releaseDownloads) {
+        copyFileSync(path.join(releaseDirectory, fileName), path.join(outputDirectory, fileName));
+      }
+    },
+  };
+}
+
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), copyReleaseDownloads()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

@@ -18,8 +18,9 @@ import StatsViewer from './components/StatsViewer';
 import AnalysisViewer from './components/AnalysisViewer';
 import ChatBox from './components/ChatBox';
 import { UserManual } from './components/UserManual';
+import DownloadPage from './components/DownloadPage';
 
-export default function App() {
+function ResearchApp() {
   const [darkMode, setDarkMode] = useState(true);
   const [showManual, setShowManual] = useState(false);
   const [projects, setProjects] = useState<ResearchProject[]>([]);
@@ -462,4 +463,9 @@ export default function App() {
       {showManual && <UserManual onClose={handleCloseManual} />}
     </div>
   );
+}
+
+export default function App() {
+  const isNativeApp = new URLSearchParams(window.location.search).get('native') === '1';
+  return window.location.pathname === '/app' || isNativeApp ? <ResearchApp /> : <DownloadPage />;
 }
