@@ -465,7 +465,29 @@ function ResearchApp() {
   );
 }
 
+const NATIVE_SESSION_KEY = 'rebo-native-shell';
+
+// The Windows (Electron) and Android (React Native WebView) wrappers should always land in the
+// research workspace, while regular browsers see the download page first.
+function isRunningInNativeShell() {
+  const fromQuery = new URLSearchParams(window.location.search).get('native') === '1';
+  const userAgent = navigator.userAgent || '';
+  const isElectron = /Electron\//i.test(userAgent);
+  const isRnApp = /Rebo26App/i.test(userAgent);
+  const isReactNativeWebView = isRnApp || typeof (window as Window & { ReactNativeWebView?: unknown }).ReactNativeWebView !== 'undefined';
+  const isInstalledPwa = window.matchMedia?.('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
+
+  let remembered = false;
+  try {
+    remembered = sessionStorage.getItem(NATIVE_SESSION_KEY) === '1';
+    if (fromQuery || isElectron || isReactNativeWebView) sessionStorage.setItem(NATIVE_SESSION_KEY, '1');
+  } catch {
+    // Storage can be unavailable in some embedded contexts; detection still works without it.
+  }
+
+  return fromQuery || isElectron || isReactNativeWebView || isInstalledPwa || remembered;
+}
+
 export default function App() {
-  const isNativeApp = new URLSearchParams(window.location.search).get('native') === '1';
-  return window.location.pathname === '/app' || isNativeApp ? <ResearchApp /> : <DownloadPage />;
+  return window.location.pathname === '/app' || isRunningInNativeShell() ? <ResearchApp /> : <DownloadPage />;
 }
