@@ -1,6 +1,6 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { copyFileSync, mkdirSync } from 'fs';
+import { copyFileSync, existsSync, mkdirSync } from 'fs';
 import path from 'path';
 import {defineConfig} from 'vite';
 
@@ -17,7 +17,13 @@ function copyReleaseDownloads() {
       const outputDirectory = path.resolve(__dirname, 'dist', 'release');
       mkdirSync(outputDirectory, { recursive: true });
       for (const fileName of releaseDownloads) {
-        copyFileSync(path.join(releaseDirectory, fileName), path.join(outputDirectory, fileName));
+        const source = path.join(releaseDirectory, fileName);
+        // Release binaries are not committed to git, so skip any that are missing.
+        if (!existsSync(source)) {
+          console.warn(`[copy-release-downloads] Skipping missing file: release/${fileName}`);
+          continue;
+        }
+        copyFileSync(source, path.join(outputDirectory, fileName));
       }
     },
   };

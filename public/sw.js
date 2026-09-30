@@ -1,5 +1,5 @@
-const CACHE_NAME = 'rebo-shell-v1';
-const APP_SHELL = ['/', '/app', '/manifest.webmanifest', '/icons/rebo-icon.svg'];
+const CACHE_NAME = 'rebo-shell-v2';
+const APP_SHELL = ['/', '/icons/rebo-icon.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
